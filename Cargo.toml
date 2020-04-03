@@ -1,0 +1,9 @@
+[package]
+name = "ad5668"
+version = "0.1.0"
+edition = "2018"
+
+authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
+
+[dependencies]
+
