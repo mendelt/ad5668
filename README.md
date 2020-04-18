@@ -1,4 +1,4 @@
-# mcp4725 &emsp; [![Build Status](https://travis-ci.com/mendelt/ad5668.svg?branch=master)](https://travis-ci.com/mendelt/ad5668)
+# AD5668 &emsp; [![Build Status](https://travis-ci.com/mendelt/ad5668.svg?branch=master)](https://travis-ci.com/mendelt/ad5668)
 
 *Analog Devices AD5668 DAC Driver for Rust Embedded HAL*
 This is a driver crate for embedded Rust. It's built on top of the Rust
@@ -11,8 +11,6 @@ It supports sending commands to a AD5668 DAC over SPI.
 - [Github repository](https://github.com/mendelt/ad5668)
 - [Crates.io](https://crates.io/crates/ad5668)
 
-
-*version: 0.1.0*
 ## License
 
 Licensed under either of
