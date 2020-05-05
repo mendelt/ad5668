@@ -11,7 +11,7 @@ pub struct AD5668<SPI>
 }
 
 impl<SPI, E> AD5668<SPI> 
-where SPI: Write<u16, Error = E>
+where SPI: Write<u8, Error = E>
 {
     pub fn new(spi: SPI) -> Self {
         Self { spi }
