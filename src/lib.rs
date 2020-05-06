@@ -17,14 +17,23 @@ where SPI: Write<u8, Error = E>
         Self { spi }
     }
 
+    pub fn write_value(&mut self, address: Address, value: u16) -> Result<(), E> {
+        let mut bytes = [0u8; 4];
+        
+        bytes[0] = Command::WriteUpdateDacChannel as u8;
+        bytes[1] = address as u8 + (value >> 12) as u8;
+        bytes[2] = (value >> 4) as u8;
+        bytes[3] = (value << 4) as u8;
 
+        self.spi.write(&bytes)
+    }
 
     // TODO send stuff to the DAC
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u8)]
-enum Address {
+pub enum Address {
     DacA = 0b0000,
     DacB = 0b0001,
     DacC = 0b0010,
@@ -42,6 +51,7 @@ enum Command {
     WriteInputRegister = 0b0000,
     UpdateDacRegister = 0b0001,
     WriteInputUpdateAll = 0b0010,
+    WriteUpdateDacChannel = 0b0011,
 }
 
 #[cfg(test)]
