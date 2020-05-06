@@ -4,7 +4,7 @@
 #[warn(missing_debug_implementations, missing_docs)]
 use embedded_hal::blocking::spi::Write;
 
-/// MCP4725 DAC driver. Wraps an I2C port to send commands to an MCP4725
+/// AD5668 DAC driver. Wraps an I2C port to send commands to an AD5668
 pub struct AD5668<SPI>
 {
     spi: SPI,
