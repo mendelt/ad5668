@@ -1,17 +1,16 @@
 #![no_std]
-
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
 use embedded_hal::blocking::spi::Write;
 
 /// AD5668 DAC driver. Wraps an I2C port to send commands to an AD5668
-pub struct AD5668<SPI>
-{
+pub struct AD5668<SPI> {
     spi: SPI,
 }
 
-impl<SPI, E> AD5668<SPI> 
-where SPI: Write<u8, Error = E>
+impl<SPI, E> AD5668<SPI>
+where
+    SPI: Write<u8, Error = E>,
 {
     pub fn new(spi: SPI) -> Self {
         Self { spi }
@@ -19,7 +18,7 @@ where SPI: Write<u8, Error = E>
 
     pub fn write_value(&mut self, address: Address, value: u16) -> Result<(), E> {
         let mut bytes = [0u8; 4];
-        
+
         bytes[0] = Command::WriteUpdateDacChannel as u8;
         bytes[1] = address as u8 + (value >> 12) as u8;
         bytes[2] = (value >> 4) as u8;
