@@ -38,7 +38,11 @@ where
     /// Write to a single input register, then update all dac channels. This can be used as the last
     /// command when updating multiple DACs. First stage values for all DACs then update them
     /// simultaniously by performing the last write using this command
-    pub fn write_input_register_update_all(&mut self, address: Address, value: u16) -> Result<(), E> {
+    pub fn write_input_register_update_all(
+        &mut self,
+        address: Address,
+        value: u16,
+    ) -> Result<(), E> {
         self.spi.write(&encode_update_command(
             Command::WriteInputUpdateAll,
             address,
