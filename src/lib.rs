@@ -1,5 +1,4 @@
 #![no_std]
-#![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
 use embedded_hal::blocking::spi::Write;
 
@@ -16,18 +15,60 @@ where
         Self { spi }
     }
 
-    pub fn write_value(&mut self, address: Address, value: u16) -> Result<(), E> {
-        let mut bytes = [0u8; 4];
-
-        bytes[0] = Command::WriteUpdateDacChannel as u8;
-        bytes[1] = address as u8 + (value >> 12) as u8;
-        bytes[2] = (value >> 4) as u8;
-        bytes[3] = (value << 4) as u8;
-
-        self.spi.write(&bytes)
+    pub fn write_input_register(&mut self, address: Address, value: u16) -> Result<(), E> {
+        self.spi.write(&encode_update_command(
+            Command::WriteInputRegister,
+            address,
+            value,
+        ))
     }
 
-    // TODO send stuff to the DAC
+    pub fn write_and_update_dac_channel(&mut self, address: Address, value: u16) -> Result<(), E> {
+        self.spi.write(&encode_update_command(
+            Command::WriteUpdateDacChannel,
+            address,
+            value,
+        ))
+    }
+}
+
+/// Encodes one of the commands that updates a 16 bit value
+fn encode_update_command(command: Command, address: Address, value: u16) -> [u8; 4] {
+    [
+        command as u8,
+        ((address as u8) << 4) + (value >> 12) as u8,
+        (value >> 4) as u8,
+        (value << 4) as u8,
+    ]
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    pub fn should_encode_command() {
+        assert_eq!(
+            encode_update_command(Command::WriteUpdateDacChannel, Address::DacA, 0u16),
+            [0b00000011, 0b00000000, 0b00000000, 0b00000000],
+        )
+    }
+
+    #[test]
+    pub fn should_encode_address() {
+        assert_eq!(
+            encode_update_command(Command::WriteInputRegister, Address::AllDacs, 0u16),
+            [0b00000000, 0b11110000, 0b00000000, 0b00000000],
+        )
+    }
+
+    #[test]
+    pub fn should_encode_value() {
+        assert_eq!(
+            encode_update_command(Command::WriteInputRegister, Address::DacA, 0xffffu16),
+            [0b00000000, 0b00001111, 0b11111111, 0b11110000],
+        )
+    }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -51,12 +92,4 @@ enum Command {
     UpdateDacRegister = 0b0001,
     WriteInputUpdateAll = 0b0010,
     WriteUpdateDacChannel = 0b0011,
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }
