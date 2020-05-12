@@ -15,6 +15,7 @@ where
         Self { spi }
     }
 
+    /// Write input register for the dac at address with the value, does not update dac register yet
     pub fn write_input_register(&mut self, address: Address, value: u16) -> Result<(), E> {
         self.spi.write(&encode_update_command(
             Command::WriteInputRegister,
@@ -23,6 +24,29 @@ where
         ))
     }
 
+    /// Update dac register for the dac at address
+    /// TODO: Check if the data is written too or if this just updates data written earlier to the
+    ///       dac
+    pub fn update_dac_register(&mut self, address: Address, value: u16) -> Result<(), E> {
+        self.spi.write(&encode_update_command(
+            Command::UpdateDacRegister,
+            address,
+            value,
+        ))
+    }
+
+    /// Write to a single input register, then update all dac channels. This can be used as the last
+    /// command when updating multiple DACs. First stage values for all DACs then update them
+    /// simultaniously by performing the last write using this command
+    pub fn write_input_register_update_all(&mut self, address: Address, value: u16) -> Result<(), E> {
+        self.spi.write(&encode_update_command(
+            Command::WriteInputUpdateAll,
+            address,
+            value,
+        ))
+    }
+
+    /// Write to input register and then update the dac register in one command.
     pub fn write_and_update_dac_channel(&mut self, address: Address, value: u16) -> Result<(), E> {
         self.spi.write(&encode_update_command(
             Command::WriteUpdateDacChannel,
