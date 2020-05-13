@@ -1,3 +1,32 @@
+//! *Analog Devices AD5668 DAC Driver for Rust Embedded HAL*
+//!
+//! This is a driver crate for embedded Rust. It's built on top of the Rust
+//! [embedded HAL](https://github.com/rust-embedded/embedded-hal)
+//! It supports sending commands to a AD5668 DAC over SPI.
+//!
+//! First you create an instance of the driver wrapping the SPI port the DAC is connected to;
+//! ```
+//! # use embedded_hal_mock::spi::Mock;
+//! # use ad5668::*;
+//! # let mut spi = Mock::new(&[]);
+//! let mut dac = AD5668::new(spi);
+//! ```
+//!
+//! Now commands can be sent to the DAC, for example to set all outputs high
+//! ```
+//! # use embedded_hal_mock::spi::{Mock, Transaction};
+//! # use ad5668::*;
+//! # let mut spi = Mock::new(&[Transaction::write(vec![0x02, 0xff, 0xff, 0xf0]),]);
+//! # let mut dac = AD5668::new(spi);
+//! dac.write_input_register_update_all(Address::AllDacs, 0xffff);
+//! ```
+//!
+//! ## More information
+//! - [AD5668 datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/AD5628_5648_5668.pdf)
+//! - [API documentation](https://docs.rs/ad5668)
+//! - [Github repository](https://github.com/mendelt/ad5668)
+//! - [Crates.io](https://crates.io/crates/ad5668)
+
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
 use embedded_hal::blocking::spi::Write;
