@@ -58,6 +58,11 @@ where
             value,
         ))
     }
+
+    /// Destroy the driver and return the wrapped SPI driver to be re-used
+    pub fn destroy(self) -> SPI {
+        self.spi
+    }
 }
 
 /// Encodes one of the commands that updates a 16 bit value
