@@ -104,6 +104,34 @@ fn encode_update_command(command: Command, address: Address, value: u16) -> [u8;
     ]
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u8)]
+pub enum Address {
+    DacA = 0b0000,
+    DacB = 0b0001,
+    DacC = 0b0010,
+    DacD = 0b0011,
+    DacE = 0b0100,
+    DacF = 0b0101,
+    DacG = 0b0110,
+    DacH = 0b0111,
+    AllDacs = 0b1111,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u8)]
+enum Command {
+    WriteInputRegister = 0b0000,
+    UpdateDacRegister = 0b0001,
+    WriteInputUpdateAll = 0b0010,
+    WriteUpdateDacChannel = 0b0011,
+    PowerDACUpDown = 0b0100,
+    LoadClearCodeRegister = 0b0101,
+    LoadLDACRegister = 0b0110,
+    Reset = 0b0111,
+    SetupInternalRefRegister = 0b1000,
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -131,32 +159,4 @@ mod test {
             [0b00000000, 0b00001111, 0b11111111, 0b11110000],
         )
     }
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[repr(u8)]
-pub enum Address {
-    DacA = 0b0000,
-    DacB = 0b0001,
-    DacC = 0b0010,
-    DacD = 0b0011,
-    DacE = 0b0100,
-    DacF = 0b0101,
-    DacG = 0b0110,
-    DacH = 0b0111,
-    AllDacs = 0b1111,
-}
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[repr(u8)]
-enum Command {
-    WriteInputRegister = 0b0000,
-    UpdateDacRegister = 0b0001,
-    WriteInputUpdateAll = 0b0010,
-    WriteUpdateDacChannel = 0b0011,
-    PowerDACUpDown = 0b0100,
-    LoadClearCodeRegister = 0b0101,
-    LoadLDACRegister = 0b0110,
-    Reset = 0b0111,
-    SetupInternalRefRegister = 0b1000,
 }
