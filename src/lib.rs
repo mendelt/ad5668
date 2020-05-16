@@ -6,18 +6,25 @@
 //!
 //! First you create an instance of the driver wrapping the SPI port the DAC is connected to;
 //! ```
-//! # use embedded_hal_mock::spi::Mock;
+//! # use embedded_hal_mock::spi::{Mock as SpiMock};
+//! # use embedded_hal_mock::pin::{Mock as PinMock};
 //! # use ad5668::*;
-//! # let mut spi = Mock::new(&[]);
-//! let mut dac = AD5668::new(spi);
+//! # let mut spi = SpiMock::new(&[]);
+//! # let mut chip_select = PinMock::new(&[]);
+//! let mut dac = AD5668::new(spi, chip_select);
 //! ```
 //!
 //! Now commands can be sent to the DAC, for example to set all outputs high
 //! ```
-//! # use embedded_hal_mock::spi::{Mock, Transaction};
+//! # use embedded_hal_mock::spi::{Mock as SpiMock, Transaction as SpiTransaction};
+//! # use embedded_hal_mock::pin::{Mock as PinMock, State as PinState, Transaction as PinTransaction};
 //! # use ad5668::*;
-//! # let mut spi = Mock::new(&[Transaction::write(vec![0x02, 0xff, 0xff, 0xf0]),]);
-//! # let mut dac = AD5668::new(spi);
+//! # let mut spi = SpiMock::new(&[SpiTransaction::write(vec![0x02, 0xff, 0xff, 0xf0]),]);
+//! # let mut chip_select = PinMock::new(&[
+//! #     PinTransaction::set(PinState::Low),
+//! #     PinTransaction::set(PinState::High),
+//! # ]);
+//! # let mut dac = AD5668::new(spi, chip_select);
 //! dac.write_input_register_update_all(Address::AllDacs, 0xffff);
 //! ```
 //!
@@ -29,7 +36,7 @@
 
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
-use embedded_hal::{digital::v2::OutputPin, blocking::spi::Write};
+use embedded_hal::{blocking::spi::Write, digital::v2::OutputPin};
 
 /// AD5668 DAC driver. Wraps an I2C port to send commands to an AD5668
 pub struct AD5668<SPI, CS> {
@@ -46,9 +53,17 @@ where
         Self { spi, chip_select }
     }
 
+    /// Helper function that handles writing to the SPI bus while toggeling chip select
+    fn write_spi(&mut self, data: &[u8]) -> Result<(), E> {
+        self.chip_select.set_low();
+        let result = self.spi.write(data);
+        self.chip_select.set_high();
+        result
+    }
+
     /// Write input register for the dac at address with the value, does not update dac register yet
     pub fn write_input_register(&mut self, address: Address, value: u16) -> Result<(), E> {
-        self.spi.write(&encode_update_command(
+        self.write_spi(&encode_update_command(
             Command::WriteInputRegister,
             address,
             value,
@@ -59,7 +74,7 @@ where
     /// TODO: Check if the data is written too or if this just updates data written earlier to the
     ///       dac
     pub fn update_dac_register(&mut self, address: Address, value: u16) -> Result<(), E> {
-        self.spi.write(&encode_update_command(
+        self.write_spi(&encode_update_command(
             Command::UpdateDacRegister,
             address,
             value,
@@ -74,7 +89,7 @@ where
         address: Address,
         value: u16,
     ) -> Result<(), E> {
-        self.spi.write(&encode_update_command(
+        self.write_spi(&encode_update_command(
             Command::WriteInputUpdateAll,
             address,
             value,
