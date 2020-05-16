@@ -29,19 +29,21 @@
 
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
-use embedded_hal::blocking::spi::Write;
+use embedded_hal::{digital::v2::OutputPin, blocking::spi::Write};
 
 /// AD5668 DAC driver. Wraps an I2C port to send commands to an AD5668
-pub struct AD5668<SPI> {
+pub struct AD5668<SPI, CS> {
     spi: SPI,
+    chip_select: CS,
 }
 
-impl<SPI, E> AD5668<SPI>
+impl<SPI, CS, E> AD5668<SPI, CS>
 where
     SPI: Write<u8, Error = E>,
+    CS: OutputPin,
 {
-    pub fn new(spi: SPI) -> Self {
-        Self { spi }
+    pub fn new(spi: SPI, chip_select: CS) -> Self {
+        Self { spi, chip_select }
     }
 
     /// Write input register for the dac at address with the value, does not update dac register yet
