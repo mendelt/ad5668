@@ -5,10 +5,10 @@ edition = "2018"
 
 authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
 license = "MIT/Apache-2.0"
-description = "Analog Devices AD5668 DAC Driver for Rust Embedded HAL"
-repository = "https://github.com/mendelt/mcp4725"
+description = "Rust Embedded HAL driver for Analog Devices AD5668 DAC"
+repository = "https://github.com/mendelt/ad5668"
 categories = ["no-std", "embedded"]
-keywords = ["dac", "i2c"]
+keywords = ["dac", "spi"]
 readme = "README.md"
 
 [badges]
