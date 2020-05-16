@@ -55,9 +55,9 @@ where
 
     /// Helper function that handles writing to the SPI bus while toggeling chip select
     fn write_spi(&mut self, data: &[u8]) -> Result<(), E> {
-        self.chip_select.set_low();
+        self.chip_select.set_low().ok();
         let result = self.spi.write(data);
-        self.chip_select.set_high();
+        self.chip_select.set_high().ok();
         result
     }
 
