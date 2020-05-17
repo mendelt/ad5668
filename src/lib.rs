@@ -49,6 +49,7 @@ where
     SPI: Write<u8, Error = E>,
     CS: OutputPin,
 {
+    /// Construct a new AD5668 driver
     pub fn new(spi: SPI, chip_select: CS) -> Self {
         Self { spi, chip_select }
     }
