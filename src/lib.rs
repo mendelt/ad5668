@@ -106,6 +106,26 @@ where
         ))
     }
 
+    /// Enable the internal reference
+    pub fn enable_internal_ref(&mut self) -> Result<(), E> {
+        self.write_spi(&[
+            Command::SetInternalRefRegister as u8,
+            0x00u8,
+            0x00u8,
+            InternalRef::Enabled as u8,
+        ])
+    }
+
+    /// Disable the internal reference
+    pub fn disable_internal_ref(&mut self) -> Result<(), E> {
+        self.write_spi(&[
+            Command::SetInternalRefRegister as u8,
+            0x00u8,
+            0x00u8,
+            InternalRef::Disabled as u8,
+        ])
+    }
+
     /// Destroy the driver and return the wrapped SPI driver to be re-used
     pub fn destroy(self) -> SPI {
         self.spi
@@ -138,6 +158,13 @@ pub enum Address {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u8)]
+pub enum InternalRef {
+    Disabled = 0x00u8,
+    Enabled = 0x01u8,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u8)]
 enum Command {
     WriteInputRegister = 0b0000,
     UpdateDacRegister = 0b0001,
@@ -147,12 +174,16 @@ enum Command {
     LoadClearCodeRegister = 0b0101,
     LoadLDACRegister = 0b0110,
     Reset = 0b0111,
-    SetupInternalRefRegister = 0b1000,
+    SetInternalRefRegister = 0b1000,
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use embedded_hal_mock::{pin, spi};
+
+    extern crate std;
+    use std::vec;
 
     #[test]
     pub fn should_encode_command() {
@@ -176,5 +207,41 @@ mod test {
             encode_update_command(Command::WriteInputRegister, Address::DacA, 0xffffu16),
             [0b00000000, 0b00001111, 0b11111111, 0b11110000],
         )
+    }
+
+    fn setup_mocks() -> (spi::Mock, pin::Mock) {
+        let spi = spi::Mock::new(&[]);
+        let chip_select = pin::Mock::new(&[
+            pin::Transaction::set(pin::State::Low),
+            pin::Transaction::set(pin::State::High),
+        ]);
+
+        (spi, chip_select)
+    }
+
+    #[test]
+    pub fn should_enable_internal_ref() {
+        let (mut spi, chip_select) = setup_mocks();
+
+        spi.expect(&[spi::Transaction::write(vec![
+            0x08u8, 0x00u8, 0x00u8, 0x01u8,
+        ])]);
+
+        let mut dac = AD5668::new(spi, chip_select);
+
+        dac.enable_internal_ref().unwrap();
+    }
+
+    #[test]
+    pub fn should_disable_internal_ref() {
+        let (mut spi, chip_select) = setup_mocks();
+
+        spi.expect(&[spi::Transaction::write(vec![
+            0x08u8, 0x00u8, 0x00u8, 0x00u8,
+        ])]);
+
+        let mut dac = AD5668::new(spi, chip_select);
+
+        dac.disable_internal_ref().unwrap();
     }
 }
