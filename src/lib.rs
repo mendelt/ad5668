@@ -99,7 +99,7 @@ where
 
     /// Write to input register and then update the dac register in one command.
     pub fn write_and_update_dac_channel(&mut self, address: Address, value: u16) -> Result<(), E> {
-        self.spi.write(&encode_update_command(
+        self.write_spi(&encode_update_command(
             Command::WriteUpdateDacChannel,
             address,
             value,
