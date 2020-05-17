@@ -6,24 +6,22 @@
 //!
 //! First you create an instance of the driver wrapping the SPI port the DAC is connected to;
 //! ```
-//! # use embedded_hal_mock::spi::{Mock as SpiMock};
-//! # use embedded_hal_mock::pin::{Mock as PinMock, State as PinState, Transaction as PinTransaction};
+//! # use embedded_hal_mock::{spi, pin};
 //! # use ad5668::*;
-//! # let mut spi = SpiMock::new(&[]);
-//! # let mut chip_select = PinMock::new(&[PinTransaction::set(PinState::High)]);
+//! # let mut spi = spi::Mock::new(&[]);
+//! # let mut chip_select = pin::Mock::new(&[pin::Transaction::set(pin::State::High)]);
 //! let mut dac = AD5668::new(spi, chip_select);
 //! ```
 //!
 //! Now commands can be sent to the DAC, for example to set all outputs high
 //! ```
-//! # use embedded_hal_mock::spi::{Mock as SpiMock, Transaction as SpiTransaction};
-//! # use embedded_hal_mock::pin::{Mock as PinMock, State as PinState, Transaction as PinTransaction};
+//! # use embedded_hal_mock::{spi, pin};
 //! # use ad5668::*;
-//! # let mut spi = SpiMock::new(&[SpiTransaction::write(vec![0x02, 0xff, 0xff, 0xf0]),]);
-//! # let mut chip_select = PinMock::new(&[
-//! #     PinTransaction::set(PinState::High),
-//! #     PinTransaction::set(PinState::Low),
-//! #     PinTransaction::set(PinState::High),
+//! # let mut spi = spi::Mock::new(&[spi::Transaction::write(vec![0x02, 0xff, 0xff, 0xf0]),]);
+//! # let mut chip_select = pin::Mock::new(&[
+//! #     pin::Transaction::set(pin::State::High),
+//! #     pin::Transaction::set(pin::State::Low),
+//! #     pin::Transaction::set(pin::State::High),
 //! # ]);
 //! # let mut dac = AD5668::new(spi, chip_select);
 //! dac.write_input_register_update_all(Address::AllDacs, 0xffff);
