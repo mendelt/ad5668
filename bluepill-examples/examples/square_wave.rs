@@ -31,12 +31,6 @@ fn main() -> ! {
     let spi2_sck = gpiob.pb13.into_alternate_push_pull(&mut gpiob.crh);
     let spi2_cs = gpiob.pb12.into_push_pull_output(&mut gpiob.crh);
 
-    // let pins = (
-    //     gpiob.pb13.into_alternate_push_pull(&mut gpiob.crh),
-    //     gpiob.pb14.into_floating_input(&mut gpiob.crh),
-    //     gpiob.pb15.into_alternate_push_pull(&mut gpiob.crh),
-    // );
-
     // Configure SPI
     let spi_mode = Mode {
         polarity: Polarity::IdleLow,
