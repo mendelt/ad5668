@@ -5,7 +5,6 @@
 #![no_std]
 
 use cortex_m_rt::entry;
-use embedded_hal::digital::v2::OutputPin;
 use hal::pac;
 use hal::prelude::*;
 use hal::spi::{Mode, NoMiso, Phase, Polarity, Spi};
@@ -29,10 +28,7 @@ fn main() -> ! {
     // Configure the pins for SPI2
     let spi2_mosi = gpiob.pb15.into_alternate_push_pull(&mut gpiob.crh);
     let spi2_sck = gpiob.pb13.into_alternate_push_pull(&mut gpiob.crh);
-    let mut spi2_cs = gpiob.pb12.into_push_pull_output(&mut gpiob.crh);
-
-    // Initialize chip select high
-    spi2_cs.set_high().ok();
+    let spi2_cs = gpiob.pb12.into_push_pull_output(&mut gpiob.crh);
 
     // Configure SPI
     let spi_mode = Mode {
