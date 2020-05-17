@@ -127,8 +127,8 @@ where
     }
 
     /// Destroy the driver and return the wrapped SPI driver to be re-used
-    pub fn destroy(self) -> SPI {
-        self.spi
+    pub fn destroy(self) -> (SPI, CS) {
+        (self.spi, self.chip_select)
     }
 }
 
