@@ -7,10 +7,10 @@
 //! First you create an instance of the driver wrapping the SPI port the DAC is connected to;
 //! ```
 //! # use embedded_hal_mock::spi::{Mock as SpiMock};
-//! # use embedded_hal_mock::pin::{Mock as PinMock};
+//! # use embedded_hal_mock::pin::{Mock as PinMock, State as PinState, Transaction as PinTransaction};
 //! # use ad5668::*;
 //! # let mut spi = SpiMock::new(&[]);
-//! # let mut chip_select = PinMock::new(&[]);
+//! # let mut chip_select = PinMock::new(&[PinTransaction::set(PinState::High)]);
 //! let mut dac = AD5668::new(spi, chip_select);
 //! ```
 //!
@@ -21,6 +21,7 @@
 //! # use ad5668::*;
 //! # let mut spi = SpiMock::new(&[SpiTransaction::write(vec![0x02, 0xff, 0xff, 0xf0]),]);
 //! # let mut chip_select = PinMock::new(&[
+//! #     PinTransaction::set(PinState::High),
 //! #     PinTransaction::set(PinState::Low),
 //! #     PinTransaction::set(PinState::High),
 //! # ]);
@@ -50,7 +51,10 @@ where
     CS: OutputPin,
 {
     /// Construct a new AD5668 driver
-    pub fn new(spi: SPI, chip_select: CS) -> Self {
+    pub fn new(spi: SPI, mut chip_select: CS) -> Self {
+        // Init chip select high
+        chip_select.set_high().ok();
+
         Self { spi, chip_select }
     }
 
@@ -127,7 +131,10 @@ where
     }
 
     /// Destroy the driver and return the wrapped SPI driver to be re-used
-    pub fn destroy(self) -> (SPI, CS) {
+    pub fn destroy(mut self) -> (SPI, CS) {
+        // Return chip select to low state
+        self.chip_select.set_low().ok();
+
         (self.spi, self.chip_select)
     }
 }
@@ -211,12 +218,30 @@ mod test {
 
     fn setup_mocks() -> (spi::Mock, pin::Mock) {
         let spi = spi::Mock::new(&[]);
+
+        // Default cs expectations, new sets high, sending command toggles low, then high
         let chip_select = pin::Mock::new(&[
+            pin::Transaction::set(pin::State::High),
             pin::Transaction::set(pin::State::Low),
             pin::Transaction::set(pin::State::High),
         ]);
 
         (spi, chip_select)
+    }
+
+    #[test]
+    pub fn should_init_chip_select_high() {
+        let (spi, mut chip_select) = setup_mocks();
+
+        chip_select.expect(&[
+            pin::Transaction::set(pin::State::High),
+            pin::Transaction::set(pin::State::Low),
+        ]);
+
+        let dac = AD5668::new(spi, chip_select);
+        let (_, mut chip_select) = dac.destroy();
+
+        chip_select.done()
     }
 
     #[test]
