@@ -1,5 +1,5 @@
-//! Example that creates a square wave (alternating high and low) using the MCP4725 driver sending
-//! fast-commands. This example is written and tested on the STM32f103 on the bluepill board.
+//! Example that creates a square wave (alternating high and low) using the AD5668 driver sending
+//! This example is written and tested on the STM32f103 using the bluepill board.
 
 #![no_main]
 #![no_std]
