@@ -128,6 +128,11 @@ where
         ])
     }
 
+    /// Reset the DAC
+    pub fn reset(&mut self) -> Result<(), E> {
+        self.write_spi(&[Command::Reset as u8, 0x00u8, 0x00u8, 0x00u8])
+    }
+
     /// Destroy the driver and return the wrapped SPI driver to be re-used
     pub fn destroy(mut self) -> (SPI, CS) {
         // Return chip select to low state
@@ -266,5 +271,18 @@ mod test {
         let mut dac = AD5668::new(spi, chip_select);
 
         dac.disable_internal_ref().unwrap();
+    }
+
+    #[test]
+    pub fn should_send_reset_command() {
+        let (mut spi, chip_select) = setup_mocks();
+
+        spi.expect(&[spi::Transaction::write(vec![
+            0x07u8, 0x00u8, 0x00u8, 0x00u8,
+        ])]);
+
+        let mut dac = AD5668::new(spi, chip_select);
+
+        dac.reset().unwrap();
     }
 }
