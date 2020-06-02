@@ -108,12 +108,23 @@ where
         ))
     }
 
+    /// Set the power to the dacs. Use power_mode to set the power down mode, channel states can
+    /// be used to power up the individual dacs by setting the corresponding bits.
+    pub fn set_power(&mut self, power_mode: PowerMode, channel_states: u8) -> Result<(), E> {
+        self.write_spi(&[
+            Command::PowerDACUpDown as u8,
+            0x0u8,
+            power_mode as u8,
+            channel_states,
+        ])
+    }
+
     /// Enable the internal reference
     pub fn enable_internal_ref(&mut self) -> Result<(), E> {
         self.write_spi(&[
             Command::SetInternalRefRegister as u8,
-            0x00u8,
-            0x00u8,
+            0x0u8,
+            0x0u8,
             InternalRef::Enabled as u8,
         ])
     }
@@ -122,8 +133,8 @@ where
     pub fn disable_internal_ref(&mut self) -> Result<(), E> {
         self.write_spi(&[
             Command::SetInternalRefRegister as u8,
-            0x00u8,
-            0x00u8,
+            0x0u8,
+            0x0u8,
             InternalRef::Disabled as u8,
         ])
     }
@@ -161,6 +172,15 @@ pub enum Address {
     DacG = 0b0110,
     DacH = 0b0111,
     AllDacs = 0b1111,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u8)]
+pub enum PowerMode {
+    Normal = 0b00u8,
+    Gnd1k = 0b01u8,
+    Gnd100k = 0b10u8,
+    ThreeState = 0x11u8,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
