@@ -134,10 +134,7 @@ where
     }
 
     /// Destroy the driver and return the wrapped SPI driver to be re-used
-    pub fn destroy(mut self) -> (SPI, CS) {
-        // Return chip select to low state
-        self.chip_select.set_low().ok();
-
+    pub fn destroy(self) -> (SPI, CS) {
         (self.spi, self.chip_select)
     }
 }
@@ -236,15 +233,9 @@ mod test {
     pub fn should_init_chip_select_high() {
         let (spi, mut chip_select) = setup_mocks();
 
-        chip_select.expect(&[
-            pin::Transaction::set(pin::State::High),
-            pin::Transaction::set(pin::State::Low),
-        ]);
+        chip_select.expect(&[pin::Transaction::set(pin::State::High)]);
 
-        let dac = AD5668::new(spi, chip_select);
-        let (_, mut chip_select) = dac.destroy();
-
-        chip_select.done()
+        let _dac = AD5668::new(spi, chip_select);
     }
 
     #[test]
