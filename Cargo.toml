@@ -15,7 +15,7 @@ readme = "README.md"
 travis-ci = { repository = "mendelt/ad5668" }
 
 [dependencies]
-embedded-hal = "1.0.0-alpha.1"
+embedded-hal = { git = "https://github.com/mendelt/embedded-hal", branch = "dac" }
 
 [dev-dependencies]
 embedded-hal-mock = {git = "https://github.com/eldruin/embedded-hal-mock", branch = "embedded-hal-1.0.0-alpha"}
