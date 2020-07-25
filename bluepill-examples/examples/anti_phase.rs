@@ -11,8 +11,7 @@ use hal::spi::{Mode, NoMiso, Phase, Polarity, Spi};
 use hal::time::U32Ext;
 
 use ad5668::*;
-#[allow(unused_imports)]
-use panic_semihosting;
+use panic_semihosting as _;
 
 #[entry]
 fn main() -> ! {
@@ -53,19 +52,5 @@ fn main() -> ! {
             .unwrap();
         dac.write_and_update_dac_channel(Address::AllDacs, 0xffffu16)
             .unwrap();
-    }
-
-    loop {
-        // dac.write_input_register(Address::DacA, 0x0u16).unwrap();
-        // dac.update_dac_register(Address::DacA, 0x0u16).unwrap();
-
-        // dac.write_input_register(Address::DacB, 0xffffu16).unwrap();
-        // dac.update_dac_register(Address::DacB, 0x0u16).unwrap();
-
-        // dac.write_input_register(Address::DacB, 0xffffu16).unwrap();
-        // dac.update_dac_register(Address::DacB, 0x0u16).unwrap();
-
-        // dac.write_input_register(Address::DacB, 0x0u16).unwrap();
-        // dac.update_dac_register(Address::DacB, 0x0u16).unwrap();
     }
 }

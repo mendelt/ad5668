@@ -11,8 +11,7 @@ use hal::spi::{Mode, NoMiso, Phase, Polarity, Spi};
 use hal::time::U32Ext;
 
 use ad5668::*;
-#[allow(unused_imports)]
-use panic_semihosting;
+use panic_semihosting as _;
 
 #[entry]
 fn main() -> ! {
