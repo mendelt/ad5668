@@ -1,4 +1,6 @@
 //! *Analog Devices AD5668 DAC Driver for Rust Embedded HAL*
+//! [![Build Status](https://github.com/mendelt/ad5668/workflows/Build/badge.svg)]
+//! (https://github.com/mendelt/ad5668/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
 //!
 //! This is a driver crate for embedded Rust. It's built on top of the Rust
 //! [embedded HAL](https://github.com/rust-embedded/embedded-hal)
