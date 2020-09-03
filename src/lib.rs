@@ -35,7 +35,7 @@
 
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
-use embedded_hal::{blocking::spi::Write, digital::v2::OutputPin};
+use embedded_hal::{blocking::spi::Write, digital::OutputPin};
 
 /// AD5668 DAC driver. Wraps an I2C port to send commands to an AD5668
 pub struct AD5668<SPI, CS> {
@@ -51,16 +51,16 @@ where
     /// Construct a new AD5668 driver
     pub fn new(spi: SPI, mut chip_select: CS) -> Self {
         // Init chip select high
-        chip_select.set_high().ok();
+        chip_select.try_set_high().ok();
 
         Self { spi, chip_select }
     }
 
     /// Helper function that handles writing to the SPI bus while toggeling chip select
     fn write_spi(&mut self, data: &[u8]) -> Result<(), E> {
-        self.chip_select.set_low().ok();
-        let result = self.spi.write(data);
-        self.chip_select.set_high().ok();
+        self.chip_select.try_set_low().ok();
+        let result = self.spi.try_write(data);
+        self.chip_select.try_set_high().ok();
         result
     }
 
