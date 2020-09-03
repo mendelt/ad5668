@@ -207,7 +207,7 @@ enum Command {
 #[cfg(test)]
 mod test {
     use super::*;
-    use embedded_hal_mock::{pin, spi};
+//    use embedded_hal_mock::{pin, spi};
 
     extern crate std;
     use std::vec;
@@ -236,64 +236,64 @@ mod test {
         )
     }
 
-    fn setup_mocks() -> (spi::Mock, pin::Mock) {
-        let spi = spi::Mock::new(&[]);
+    // fn setup_mocks() -> (spi::Mock, pin::Mock) {
+    //     let spi = spi::Mock::new(&[]);
 
-        // Default cs expectations, new sets high, sending command toggles low, then high
-        let chip_select = pin::Mock::new(&[
-            pin::Transaction::set(pin::State::High),
-            pin::Transaction::set(pin::State::Low),
-            pin::Transaction::set(pin::State::High),
-        ]);
+    //     // Default cs expectations, new sets high, sending command toggles low, then high
+    //     let chip_select = pin::Mock::new(&[
+    //         pin::Transaction::set(pin::State::High),
+    //         pin::Transaction::set(pin::State::Low),
+    //         pin::Transaction::set(pin::State::High),
+    //     ]);
 
-        (spi, chip_select)
-    }
+    //     (spi, chip_select)
+    // }
 
-    #[test]
-    pub fn should_init_chip_select_high() {
-        let (spi, mut chip_select) = setup_mocks();
+    // #[test]
+    // pub fn should_init_chip_select_high() {
+    //     let (spi, mut chip_select) = setup_mocks();
 
-        chip_select.expect(&[pin::Transaction::set(pin::State::High)]);
+    //     chip_select.expect(&[pin::Transaction::set(pin::State::High)]);
 
-        let _dac = AD5668::new(spi, chip_select);
-    }
+    //     let _dac = AD5668::new(spi, chip_select);
+    // }
 
-    #[test]
-    pub fn should_enable_internal_ref() {
-        let (mut spi, chip_select) = setup_mocks();
+    // #[test]
+    // pub fn should_enable_internal_ref() {
+    //     let (mut spi, chip_select) = setup_mocks();
 
-        spi.expect(&[spi::Transaction::write(vec![
-            0x08u8, 0x00u8, 0x00u8, 0x01u8,
-        ])]);
+    //     spi.expect(&[spi::Transaction::write(vec![
+    //         0x08u8, 0x00u8, 0x00u8, 0x01u8,
+    //     ])]);
 
-        let mut dac = AD5668::new(spi, chip_select);
+    //     let mut dac = AD5668::new(spi, chip_select);
 
-        dac.enable_internal_ref().unwrap();
-    }
+    //     dac.enable_internal_ref().unwrap();
+    // }
 
-    #[test]
-    pub fn should_disable_internal_ref() {
-        let (mut spi, chip_select) = setup_mocks();
+    // #[test]
+    // pub fn should_disable_internal_ref() {
+    //     let (mut spi, chip_select) = setup_mocks();
 
-        spi.expect(&[spi::Transaction::write(vec![
-            0x08u8, 0x00u8, 0x00u8, 0x00u8,
-        ])]);
+    //     spi.expect(&[spi::Transaction::write(vec![
+    //         0x08u8, 0x00u8, 0x00u8, 0x00u8,
+    //     ])]);
 
-        let mut dac = AD5668::new(spi, chip_select);
+    //     let mut dac = AD5668::new(spi, chip_select);
 
-        dac.disable_internal_ref().unwrap();
-    }
+    //     dac.disable_internal_ref().unwrap();
+    // }
 
-    #[test]
-    pub fn should_send_reset_command() {
-        let (mut spi, chip_select) = setup_mocks();
+    // #[test]
+    // pub fn should_send_reset_command() {
+    //     let (mut spi, chip_select) = setup_mocks();
 
-        spi.expect(&[spi::Transaction::write(vec![
-            0x07u8, 0x00u8, 0x00u8, 0x00u8,
-        ])]);
+    //     spi.expect(&[spi::Transaction::write(vec![
+    //         0x07u8, 0x00u8, 0x00u8, 0x00u8,
+    //     ])]);
 
-        let mut dac = AD5668::new(spi, chip_select);
+    //     let mut dac = AD5668::new(spi, chip_select);
 
-        dac.reset().unwrap();
-    }
+    //     dac.reset().unwrap();
+    // }
 }
