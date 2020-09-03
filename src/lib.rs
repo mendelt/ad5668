@@ -198,8 +198,8 @@ enum Command {
     WriteInputUpdateAll = 0b0010,
     WriteUpdateDacChannel = 0b0011,
     PowerDACUpDown = 0b0100,
-    LoadClearCodeRegister = 0b0101,
-    LoadLDACRegister = 0b0110,
+    _LoadClearCodeRegister = 0b0101,
+    _LoadLDACRegister = 0b0110,
     Reset = 0b0111,
     SetInternalRefRegister = 0b1000,
 }
