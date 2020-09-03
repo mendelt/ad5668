@@ -35,21 +35,21 @@
 
 #![no_std]
 #[warn(missing_debug_implementations, missing_docs)]
-use embedded_hal::{blocking::spi::Write, digital::OutputPin};
+use embedded_hal::{blocking::{dac::DAC, spi::Write}, digital::OutputPin};
+use core::{marker::PhantomData, cell::RefCell};
 
-/// AD5668 DAC driver. Wraps an I2C port to send commands to an AD5668
-pub struct AD5668<SPI, CS> {
+
+struct AD5668Core<SPI, CS> {
     spi: SPI,
     chip_select: CS,
 }
 
-impl<SPI, CS, E> AD5668<SPI, CS>
+impl<SPI, CS, E> AD5668Core<SPI, CS>
 where
     SPI: Write<u8, Error = E>,
     CS: OutputPin,
 {
-    /// Construct a new AD5668 driver
-    pub fn new(spi: SPI, mut chip_select: CS) -> Self {
+    fn new(spi: SPI, mut chip_select: CS) -> Self {
         // Init chip select high
         chip_select.try_set_high().ok();
 
@@ -62,6 +62,27 @@ where
         let result = self.spi.try_write(data);
         self.chip_select.try_set_high().ok();
         result
+    }
+}
+
+/// AD5668 DAC driver. Wraps an I2C port to send commands to an AD5668
+pub struct AD5668<SPI, CS> {
+    inner: RefCell<AD5668Core<SPI, CS>>,
+}
+
+impl<SPI, CS, E> AD5668<SPI, CS>
+where
+    SPI: Write<u8, Error = E>,
+    CS: OutputPin,
+{
+    /// Construct a new AD5668 driver
+    pub fn new(spi: SPI, chip_select: CS) -> Self {
+        Self { inner: RefCell::new(AD5668Core::new(spi, chip_select))}
+    }
+
+    fn write_spi(&mut self, data: &[u8]) -> Result<(), E> {
+        // TODO: handle BorrowMutError
+        self.inner.try_borrow_mut().unwrap().write_spi(data)
     }
 
     /// Write input register for the dac at address with the value, does not update dac register yet
@@ -144,9 +165,56 @@ where
         self.write_spi(&[Command::Reset as u8, 0x00u8, 0x00u8, 0x00u8])
     }
 
-    /// Destroy the driver and return the wrapped SPI driver to be re-used
-    pub fn destroy(self) -> (SPI, CS) {
-        (self.spi, self.chip_select)
+    /// Split channels
+    pub fn split<'a>(&'a self) -> (
+        AD5668Channel<'a, E, SPI, CS>,
+        AD5668Channel<'a, E, SPI, CS>,
+        AD5668Channel<'a, E, SPI, CS>,
+        AD5668Channel<'a, E, SPI, CS>,
+        AD5668Channel<'a, E, SPI, CS>,
+        AD5668Channel<'a, E, SPI, CS>,
+        AD5668Channel<'a, E, SPI, CS>,
+        AD5668Channel<'a, E, SPI, CS>,
+    ) {
+        (
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacA},
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacB},
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacC},
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacD},
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacE},
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacF},
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacG},
+            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacH},
+        )
+    }
+
+    // /// Destroy the driver and return the wrapped SPI driver to be re-used
+    // TODO: figure out if we can do this when we first destroy all channels too?
+    // pub fn destroy(self) -> (SPI, CS) {
+    //     (self.spi, self.chip_select)
+    // }
+}
+
+pub struct AD5668Channel<'a, E, SPI, CS> {
+    e: PhantomData<E>,
+    inner: &'a RefCell<AD5668Core<SPI, CS>>,
+    address: Address,
+}
+
+impl<E, SPI, CS> DAC for AD5668Channel<'_, E, SPI, CS> where
+SPI: Write<u8, Error = E>,
+CS: OutputPin,
+{
+    type Error = E;
+    type Word = u16;
+
+    fn try_set_output(&mut self, value: Self::Word) -> Result<(), Self::Error> {
+        // TODO: handle BorrowMutError
+        self.inner.try_borrow_mut().unwrap().write_spi(&encode_update_command(
+            Command::WriteUpdateDacChannel,
+            self.address,
+            value,
+        ))
     }
 }
 
