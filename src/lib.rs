@@ -34,10 +34,11 @@
 //! - [Crates.io](https://crates.io/crates/ad5668)
 
 #![no_std]
+use core::{cell::RefCell, marker::PhantomData};
 #[warn(missing_debug_implementations, missing_docs)]
-use embedded_hal::{blocking::{dac::DAC, spi::Write}, digital::OutputPin};
-use core::{marker::PhantomData, cell::RefCell};
-
+use embedded_hal::blocking::dac::SingleChannelDac;
+use embedded_hal::blocking::spi::Write;
+use embedded_hal::digital::OutputPin;
 
 struct AD5668Core<SPI, CS> {
     spi: SPI,
@@ -77,7 +78,9 @@ where
 {
     /// Construct a new AD5668 driver
     pub fn new(spi: SPI, chip_select: CS) -> Self {
-        Self { inner: RefCell::new(AD5668Core::new(spi, chip_select))}
+        Self {
+            inner: RefCell::new(AD5668Core::new(spi, chip_select)),
+        }
     }
 
     fn write_spi(&mut self, data: &[u8]) -> Result<(), E> {
@@ -166,7 +169,9 @@ where
     }
 
     /// Split channels
-    pub fn split<'a>(&'a self) -> (
+    pub fn split<'a>(
+        &'a self,
+    ) -> (
         AD5668Channel<'a, E, SPI, CS>,
         AD5668Channel<'a, E, SPI, CS>,
         AD5668Channel<'a, E, SPI, CS>,
@@ -177,14 +182,46 @@ where
         AD5668Channel<'a, E, SPI, CS>,
     ) {
         (
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacA},
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacB},
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacC},
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacD},
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacE},
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacF},
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacG},
-            AD5668Channel {e: PhantomData{}, inner: &self.inner, address: Address::DacH},
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacA,
+            },
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacB,
+            },
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacC,
+            },
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacD,
+            },
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacE,
+            },
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacF,
+            },
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacG,
+            },
+            AD5668Channel {
+                e: PhantomData {},
+                inner: &self.inner,
+                address: Address::DacH,
+            },
         )
     }
 
@@ -201,20 +238,24 @@ pub struct AD5668Channel<'a, E, SPI, CS> {
     address: Address,
 }
 
-impl<E, SPI, CS> DAC for AD5668Channel<'_, E, SPI, CS> where
-SPI: Write<u8, Error = E>,
-CS: OutputPin,
+impl<E, SPI, CS> SingleChannelDac for AD5668Channel<'_, E, SPI, CS>
+where
+    SPI: Write<u8, Error = E>,
+    CS: OutputPin,
 {
     type Error = E;
     type Word = u16;
 
-    fn try_set_output(&mut self, value: Self::Word) -> Result<(), Self::Error> {
+    fn try_set_value(&mut self, value: Self::Word) -> Result<(), Self::Error> {
         // TODO: handle BorrowMutError
-        self.inner.try_borrow_mut().unwrap().write_spi(&encode_update_command(
-            Command::WriteUpdateDacChannel,
-            self.address,
-            value,
-        ))
+        self.inner
+            .try_borrow_mut()
+            .unwrap()
+            .write_spi(&encode_update_command(
+                Command::WriteUpdateDacChannel,
+                self.address,
+                value,
+            ))
     }
 }
 
@@ -275,7 +316,7 @@ enum Command {
 #[cfg(test)]
 mod test {
     use super::*;
-//    use embedded_hal_mock::{pin, spi};
+    //    use embedded_hal_mock::{pin, spi};
 
     extern crate std;
     use std::vec;
