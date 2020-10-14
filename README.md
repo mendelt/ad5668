@@ -1,4 +1,4 @@
-# AD5668 &emsp; [![Build Status]
+# AD5668 &emsp;
 [![Build Status](https://github.com/mendelt/ad5668/workflows/Build/badge.svg)](https://github.com/mendelt/ad5668/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
 
 *Analog Devices AD5668 DAC Driver for Rust Embedded HAL*
